@@ -34,6 +34,7 @@ export class Clock extends HTMLElement {
    * Init internal DOM and properties
    */
   init() {
+    this.syncWithBrowserClock();
     this.generateDom();
     this.timeStamp = this.getBrowserTime();
     this.startTimer();
@@ -46,8 +47,18 @@ export class Clock extends HTMLElement {
   {
     let browserTime = new Date();
     return Math.round(browserTime.getTime() / 1000);
-     
   }
+
+  /**
+   * Sync clock with internet browser
+   */
+  syncWithBrowserClock() {
+    let browserTime = new Date();
+    this.secondes = browserTime.getSeconds();
+    this.minutes = browserTime.getMinutes();
+    this.hours = browserTime.getHours();
+  }
+
   /**
    * Start internal timer
    */
