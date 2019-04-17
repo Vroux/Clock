@@ -47,10 +47,10 @@ export class ClockMaths {
     if ((posX >= 100) && (posY >= 100)) { // bottom right corner
       return this.angleFromSides(posY - 100, posX - 100) + 90;
     }
-    if ((posX < 100) && (posY >= 100)) { // bottom left corner
+    if ((posX < 100) && (posY > 100)) { // bottom left corner
       return this.angleFromSides(posX - 100, 100 - posY) + 180;
     }
-    if ((posX < 100) && (posY < 100)) { // upper left corner
+    if ((posX < 100) && (posY <= 100)) { // upper left corner
       return this.angleFromSides(posY - 100, posX - 100) + 270;
     }
     return 0;
