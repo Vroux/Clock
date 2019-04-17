@@ -14,6 +14,7 @@ export class Clock extends HTMLElement {
   minuteHandElement: SVGPathElement;
   hourHandElement: SVGPathElement;
   clockElement: HTMLElement;
+  nextHandElement: SVGPathElement;
 
   selectedElement: Element;
 
@@ -29,6 +30,7 @@ export class Clock extends HTMLElement {
     this.hourHandElement = this.shadowRoot.querySelector('#hour_hand') as SVGPathElement;
     this.clockElement = this.shadowRoot.querySelector('#clock') as HTMLElement;
     this.selectedElement = this.clockElement;
+    this.nextHandElement = this.shadowRoot.querySelector('#next_hand') as SVGPathElement;
     this.generateSelectionEvent();
   }
 
@@ -140,21 +142,6 @@ export class Clock extends HTMLElement {
    * Generate HTML/SVG 
    */
   generateDom() {
-
-    let htmlClockBase = `
-        <circle r="96" cx="100" cy="100" stroke="black"  stroke-width="4" fill="beige" />
-        <circle r="4" cx="100" cy="100" stroke="black"  stroke-width="4" fill="beige" />    
-    `;
-    let htmlSecondeHand = `
-        <path id="seconde_hand" d="M 100 100 l 0 -90" stroke="black" stroke-width="2" transform="rotate(0, 100, 100)" />
-    `;
-    let htmlMinuteHand = `
-        <path id="minute_hand" d="M 100 100 l 0 -90" stroke="black" stroke-width="4" transform="rotate(0, 100, 100)" />
-    `;
-    let htmlHourHand = `
-        <path id="hour_hand" d="M 100 100 l 0 -60" stroke="black" stroke-width="6" transform="rotate(0, 100, 100)" />
-    `;
-
     let html = `
       <slot></slot>
       <style>
@@ -163,7 +150,14 @@ export class Clock extends HTMLElement {
         }
       </style>
       <div id="num_clock">${this.hours}:${this.minutes}:${this.secondes}</div>
-      <svg width="200" height="200" viewBox="0 0 200 200" id="clock">${htmlClockBase+htmlSecondeHand+htmlMinuteHand+htmlHourHand}</svg>
+      <svg width="200" height="200" viewBox="0 0 200 200" id="clock">
+        <circle r="96" cx="100" cy="100" stroke="black"  stroke-width="4" fill="beige" />
+        <path id="next_hand" d="M 100 100 l 0 -60" stroke="transparent" stroke-width="6" transform="rotate(0, 100, 100)" />
+        <path id="seconde_hand" data-selectable="yes" d="M 100 100 l 0 -90" stroke="black" stroke-width="2" transform="rotate(0, 100, 100)" />
+        <path id="minute_hand" data-selectable="yes" d="M 100 100 l 0 -90" stroke="black" stroke-width="4" transform="rotate(0, 100, 100)" />
+        <path id="hour_hand" data-selectable="yes" d="M 100 100 l 0 -60" stroke="black" stroke-width="6" transform="rotate(0, 100, 100)" />
+        <circle r="4" cx="100" cy="100" stroke="black"  stroke-width="4" fill="beige" />
+      </svg>
     `;
     this.attachShadow({ mode: 'open' });
     let myShadow = (this.shadowRoot as ShadowRoot);
@@ -178,20 +172,19 @@ export class Clock extends HTMLElement {
     this.addMouseClockLeaveEvent();
     this.clockElement.addEventListener('mousedown', event => {
       const target = event.target as SVGElement;
-      if (target.id != '') {
-        this.selectedElement = target;
-        target.classList.add('handSelected');
-      }
+      if (target.id == '') {return;}
+      if (target.dataset.selectable != 'yes') {return;}
+      this.selectedElement = target;
+      target.classList.add('handSelected');
+      this.activateNexthand();
+      this.addMouseMoveEvent();
     });
 
     this.clockElement.addEventListener('mouseup', event => {
       const target = event.target as HTMLElement;
-      
-      var viewportOffset = this.clockElement.getBoundingClientRect();
 
-      let posX = event.pageX - Math.round(viewportOffset.left - window.scrollX);
-      let posY = event.pageY - Math.round(viewportOffset.top + window.scrollY);
-      
+      let {posX, posY} = this.getCursorPosition(event);
+
       if (this.selectedElement.id === this.hourHandElement.id) {
         this.hours = ClockMaths.hoursFromPosition(posX, posY);
         this.refreshHours();
@@ -205,16 +198,50 @@ export class Clock extends HTMLElement {
         this.refreshMinutes();
       }
       this.unSelectHands();
+      this.desactivateNexthand();
+      this.removeMouseMoveEvent();
     });
   }
+
+  getCursorPosition(event: MouseEvent) {
+    var viewportOffset = this.clockElement.getBoundingClientRect();
+    let posX = event.pageX - Math.round(viewportOffset.left - window.scrollX);
+    let posY = event.pageY - Math.round(viewportOffset.top + window.scrollY);
+    return {posX, posY};
+  }
+
   /**
    * Remove the selection when the cursor leaves the clock
    */
   addMouseClockLeaveEvent() {
-    // TODO : Ajouter cet element uniquement dans mousedown
     this.clockElement.addEventListener('mouseleave', () => {
       this.unSelectHands();
+      this.desactivateNexthand();
+      this.removeMouseMoveEvent();
     });
+  }
+
+  addMouseMoveEvent() {
+    this.clockElement.addEventListener('mousemove', event => {
+      if (this.selectedElement == this.clockElement) {return;}
+      let {posX, posY} = this.getCursorPosition(event);
+      let deg = ClockMaths.computeAngle(posX, posY);
+      this.nextHandElement.setAttribute('transform', `rotate(${deg}, 100, 100)`);
+    });
+  }
+  removeMouseMoveEvent() {
+    this.clockElement.removeEventListener('mousemove', event => {});
+  }
+
+  activateNexthand() {
+    this.nextHandElement.style.stroke = 'darkblue';
+    let d = this.selectedElement.getAttribute('d') || '';
+    this.nextHandElement.setAttribute('d', d);
+    let strokeWidth = this.selectedElement.getAttribute('stroke-width') || '';
+    this.nextHandElement.setAttribute('stroke-width', strokeWidth);
+  }
+  desactivateNexthand() {
+    this.nextHandElement.style.stroke = 'transparent';
   }
   /**
    * Unselect clockhand
