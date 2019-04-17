@@ -155,8 +155,6 @@ export class Clock extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     let myShadow = (this.shadowRoot as ShadowRoot);
     myShadow.innerHTML = html;
-    // let slot = myShadow.querySelector('slot') as HTMLElement;
-    // console.log('HTML slot: '+slot.innerHTML);
   }
   /**
    * Generate click event on hands
@@ -171,7 +169,6 @@ export class Clock extends HTMLElement {
         this.selectedElement = target;
         target.classList.add('handSelected');
       }
-      //console.log('ID: '+target.id);
     });
 
     this.clockElement.addEventListener('mouseup', event => {
@@ -198,7 +195,7 @@ export class Clock extends HTMLElement {
     });
   }
 
-    /**
+  /**
    * hours From Position
    * @param posX 
    * @param posY 
@@ -269,11 +266,11 @@ export class Clock extends HTMLElement {
    */
   radiansToDegrees(radians = 0)
   {
-  var pi = Math.PI;
-  return radians * (180/pi);
+    var pi = Math.PI;
+    return radians * (180/pi);
   }
   /**
-   * 
+   * Remove the selection when the cursor leaves the clock
    */
   addMouseClockLeaveEvent() {
     // TODO : Ajouter cet element uniquement dans mousedown
