@@ -2,10 +2,10 @@
 
 To use it : 
 
-```
+```js
 import { Clock } from './components/Clock/Clock';
 
-customElements.define('vrx-clock', Clock);
+customElements.define('my-clock', Clock);
 
 function main() {
   const myClock = new Clock();
