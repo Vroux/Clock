@@ -1,13 +1,9 @@
 import { ClockMaths } from './ClockMaths';
+import { ClockTime } from './ClockTime';
 
 export class Clock extends HTMLElement {
 
   shadowRoot!: ShadowRoot;
-  secondes = 0;
-  minutes = 0;
-  hours = 0;
-  timeStamp = 0;
-  timer = 0;
 
   numClockElement: HTMLElement;
   secondeHandElement: SVGPathElement;
@@ -18,12 +14,17 @@ export class Clock extends HTMLElement {
 
   selectedElement: Element;
 
+  clockTime: ClockTime;
+
   /**
    * Init HTMLElement and Clock properties
    */
   constructor() {
     super();
-    this.init();
+
+    this.clockTime = new ClockTime(this);
+
+    this.generateDom();
     this.numClockElement = this.shadowRoot.querySelector('#num_clock') as HTMLElement;
     this.secondeHandElement = this.shadowRoot.querySelector('#seconde_hand') as SVGPathElement;
     this.minuteHandElement = this.shadowRoot.querySelector('#minute_hand') as SVGPathElement;
@@ -35,113 +36,44 @@ export class Clock extends HTMLElement {
   }
 
   /**
-   * Init internal DOM and properties
-   */
-  init() {
-    this.syncWithBrowserClock();
-    this.generateDom();
-    this.timeStamp = this.getBrowserTime();
-    this.startTimer();
-  }
-
-  /**
-   * Get the browser timestamp in seconds
-   */
-  getBrowserTime()
-  {
-    let browserTime = new Date();
-    return Math.round(browserTime.getTime() / 1000);
-  }
-
-  /**
-   * Sync clock with internet browser
-   */
-  syncWithBrowserClock() {
-    let browserTime = new Date();
-    this.secondes = browserTime.getSeconds();
-    this.minutes = browserTime.getMinutes();
-    this.hours = browserTime.getHours();
-  }
-
-  /**
-   * Start internal timer
-   */
-  startTimer() {
-    this.timer = window.setTimeout(() => {
-      this.next();
-    }, 400);
-  }
-  /**
-   * Stop internal timer
-   */
-  stopTimer() {
-    window.clearTimeout(this.timer);
-  }
-  /**
-   * next time
-   */
-  next() {      
-      let browserTime = this.getBrowserTime();
-      if (this.timeStamp >= browserTime) {
-        this.startTimer();
-        return;
-      }
-      this.timeStamp = browserTime;
-      this.secondes += 1;
-      if (this.secondes > 59) {
-        this.secondes = 0;
-        this.minutes += 1;
-      }
-      if (this.minutes > 59) {
-        this.minutes = 0;
-        this.hours += 1;
-      }
-      if (this.hours > 23) {
-        this.hours = 0;
-      }
-      this.setNumClock();
-      this.setMinuteHand();
-      this.startTimer();
-  }
-  /**
    * Define digital clock
    */
-  setNumClock() {
+  setNumClock(hours = 0, minutes = 0, secondes = 0) {
     if (this.numClockElement == null) {return;}
-    this.numClockElement.innerHTML = `${(this.hours.toString().padStart(2, '0'))}:${this.minutes.toString().padStart(2, '0')}:${this.secondes.toString().padStart(2, '0')}`;
+    this.numClockElement.innerHTML = `${(hours.toString().padStart(2, '0'))}:${minutes.toString().padStart(2, '0')}:${secondes.toString().padStart(2, '0')}`;
   }
   /**
    * Define hands positions
    */
-  setMinuteHand() {
-    let degSec = Math.round(this.secondes * 360 / 60);
+  setMinuteHand(hours = 0, minutes = 0, secondes = 0) {
+    let degSec = Math.round(secondes * 360 / 60);
     this.secondeHandElement.setAttribute('transform', `rotate(${degSec}, 100, 100)`);
-    if (this.secondes > 0) {
-      this.refreshMinutes();
-      this.refreshHours();
+    if (secondes > 0) {
+      this.refreshMinutes(minutes);
+      this.refreshHours(hours);
     }
   }
 
   /**
    * refresh hand Hours
    */
-  refreshMinutes() {
-    let degMin = Math.round(this.minutes * 360 / 60);
+  refreshMinutes(minutes = 0) {
+    let degMin = Math.round(minutes * 360 / 60);
     this.minuteHandElement.setAttribute('transform', `rotate(${degMin}, 100, 100)`);
   }
 
   /**
    * refresh hand Hours
    */
-  refreshHours() {
-    let degHour = Math.round(this.hours * 360 / 12);
+  refreshHours(hours = 0) {
+    let degHour = Math.round(hours * 360 / 12);
     this.hourHandElement.setAttribute('transform', `rotate(${degHour}, 100, 100)`);
   }
 
   /**
    * Generate HTML/SVG 
    */
-  generateDom() {
+  generateDom(hours = 0, minutes = 0, secondes = 0) {
     let html = `
       <slot></slot>
       <style>
@@ -149,7 +81,7 @@ export class Clock extends HTMLElement {
           stroke: gray;
         }
       </style>
-      <div id="num_clock">${this.hours}:${this.minutes}:${this.secondes}</div>
+      <div id="num_clock">${hours}:${minutes}:${secondes}</div>
       <svg width="200" height="200" viewBox="0 0 200 200" id="clock">
         <circle r="96" cx="100" cy="100" stroke="black"  stroke-width="4" fill="beige" />
         <path id="next_hand" d="M 100 100 l 0 -60" stroke="transparent" stroke-width="6" transform="rotate(0, 100, 100)" />
@@ -186,16 +118,17 @@ export class Clock extends HTMLElement {
       let {posX, posY} = this.getCursorPosition(event);
 
       if (this.selectedElement.id === this.hourHandElement.id) {
-        this.hours = ClockMaths.hoursFromPosition(posX, posY);
-        this.refreshHours();
+        
+        this.clockTime.hours = ClockMaths.hoursFromPosition(posX, posY);
+        this.refreshHours(this.clockTime.hours);
       }
       if (this.selectedElement.id === this.minuteHandElement.id) {
-        this.minutes = ClockMaths.minuteFromPosition(posX, posY);
-        this.refreshMinutes();
+        this.clockTime.minutes = ClockMaths.minuteFromPosition(posX, posY);
+        this.refreshMinutes(this.clockTime.minutes);
       }
       if (this.selectedElement.id === this.secondeHandElement.id) {
-        this.secondes = ClockMaths.minuteFromPosition(posX, posY);
-        this.refreshMinutes();
+        this.clockTime.secondes = ClockMaths.minuteFromPosition(posX, posY);
+        this.refreshMinutes(this.clockTime.secondes);
       }
       this.unSelectHands();
       this.desactivateNexthand();
