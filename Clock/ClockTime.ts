@@ -69,8 +69,8 @@ export class ClockTime {
     if (this.hours > 23) {
       this.hours = 0;
     }
-    this.clock.setNumClock(this.hours, this.minutes, this.secondes);
-    this.clock.setMinuteHand(this.hours, this.minutes, this.secondes);
+    this.clock.clockDom.setNumClock(this.hours, this.minutes, this.secondes);
+    this.clock.clockDom.setMinuteHand(this.hours, this.minutes, this.secondes);
     this.startTimer();
   }
 }
