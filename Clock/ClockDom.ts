@@ -1,4 +1,5 @@
 import { Clock } from "./Clock";
+import { ClockMaths } from "./ClockMaths";
 
 export class ClockDom {
   content = '';
@@ -36,6 +37,7 @@ export class ClockDom {
       <div id="num_clock">${hours}:${minutes}:${secondes}</div>
       <svg width="200" height="200" viewBox="0 0 200 200" id="clock">
         <circle r="96" cx="100" cy="100" stroke="black"  stroke-width="4" fill="beige" />
+        ${this.defineBackGround()}
         <path id="next_hand" d="M 100 100 l 0 -60" stroke="transparent" stroke-width="6" transform="rotate(0, 100, 100)" />
         <path id="seconde_hand" data-selectable="yes" d="M 100 100 l 0 -90" stroke="black" stroke-width="2" transform="rotate(0, 100, 100)" />
         <path id="minute_hand" data-selectable="yes" d="M 100 100 l 0 -90" stroke="black" stroke-width="4" transform="rotate(0, 100, 100)" />
@@ -46,6 +48,20 @@ export class ClockDom {
     this.clock.attachShadow({ mode: 'open' });
     let myShadow = (this.clock.shadowRoot as ShadowRoot);
     myShadow.innerHTML = html;
+  }
+
+  defineBackGround() {
+    let html = ``;
+    for (let hour = 1; hour < 13; hour++) {
+      let angle = Math.round(360 * hour / 12);
+      html += `<path id="h_${hour}" stroke-width="4" stroke="black" d="M 100 100 m 0 -80 l 0 -15" transform="rotate(${angle}, 100, 100)" />`;
+    }
+    html += `<text x="170" y="110" text-anchor="middle" font-family="Verdana" font-size="26" style="pointer-events: none;">3</text>
+      <text x="100" y="175" text-anchor="middle" font-family="Verdana" font-size="26">6</text>
+      <text x="30" y="110" text-anchor="middle" font-family="Verdana" font-size="26">9</text>
+      <text x="100" y="45" text-anchor="middle" font-family="Verdana" font-size="26">12</text>
+      `;
+    return html;
   }
     /**
    * Define digital clock
