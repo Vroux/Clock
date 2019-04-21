@@ -81,4 +81,29 @@ export class ClockDom {
     let degHour = Math.round(hours * 360 / 12);
     this.hourHandElement.setAttribute('transform', `rotate(${degHour}, 100, 100)`);
   }
+  getCursorPosition(event: MouseEvent) {
+    var viewportOffset = this.clockElement.getBoundingClientRect();
+    let posX = event.pageX - Math.round(viewportOffset.left - window.scrollX);
+    let posY = event.pageY - Math.round(viewportOffset.top + window.scrollY);
+    return {posX, posY};
+  }
+  activateNexthand() {
+    this.nextHandElement.style.stroke = 'darkblue';
+    let d = this.selectedElement.getAttribute('d') || '';
+    this.nextHandElement.setAttribute('d', d);
+    let strokeWidth = this.selectedElement.getAttribute('stroke-width') || '';
+    this.nextHandElement.setAttribute('stroke-width', strokeWidth);
+  }
+  desactivateNexthand() {
+    this.nextHandElement.style.stroke = 'transparent';
+  }
+  /**
+   * Unselect clockhand
+   */
+  unSelectHands() {
+    this.selectedElement = this.clockElement;
+    this.secondeHandElement.classList.remove("handSelected");
+    this.minuteHandElement.classList.remove("handSelected");
+    this.hourHandElement.classList.remove("handSelected");
+  }
 }
