@@ -18,16 +18,19 @@ export class Clock extends HTMLElement {
     this.clockTime = new ClockTime(this);
     this.clockDom = new ClockDom(this);
 
-    this.generateSelectionEvent();
+    this.addMouseClockLeaveEvent();
+    this.addMouseDownEvent();
+    this.addMouseUpEvent();
   }
 
-  /**
-   * Generate click event on hands
-   */
-  generateSelectionEvent() {
+  getCursorPosition(event: MouseEvent) {
+    var viewportOffset = this.clockDom.clockElement.getBoundingClientRect();
+    let posX = event.pageX - Math.round(viewportOffset.left - window.scrollX);
+    let posY = event.pageY - Math.round(viewportOffset.top + window.scrollY);
+    return {posX, posY};
+  }
 
-    // Select clock element under the cursor
-    this.addMouseClockLeaveEvent();
+  addMouseDownEvent() {
     this.clockDom.clockElement.addEventListener('mousedown', event => {
       const target = event.target as SVGElement;
       if (target.id == '') {return;}
@@ -37,7 +40,9 @@ export class Clock extends HTMLElement {
       this.activateNexthand();
       this.addMouseMoveEvent();
     });
+  }
 
+  addMouseUpEvent() {
     this.clockDom.clockElement.addEventListener('mouseup', event => {
       const target = event.target as HTMLElement;
 
@@ -60,13 +65,6 @@ export class Clock extends HTMLElement {
       this.desactivateNexthand();
       this.removeMouseMoveEvent();
     });
-  }
-
-  getCursorPosition(event: MouseEvent) {
-    var viewportOffset = this.clockDom.clockElement.getBoundingClientRect();
-    let posX = event.pageX - Math.round(viewportOffset.left - window.scrollX);
-    let posY = event.pageY - Math.round(viewportOffset.top + window.scrollY);
-    return {posX, posY};
   }
 
   /**
