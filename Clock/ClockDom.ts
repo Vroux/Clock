@@ -56,6 +56,10 @@ export class ClockDom {
       let angle = Math.round(360 * hour / 12);
       html += `<path id="h_${hour}" stroke-width="4" stroke="black" d="M 100 100 m 0 -80 l 0 -15" transform="rotate(${angle}, 100, 100)" />`;
     }
+    for (let minute = 1; minute < 60; minute++) {
+      let angle = Math.round(360 * minute / 60);
+      html += `<path id="h_${minute}" stroke-width="2" stroke="black" d="M 100 100 m 0 -85 l 0 -10" transform="rotate(${angle}, 100, 100)" />`;
+    }
     html += `<text x="170" y="110" text-anchor="middle" font-family="Verdana" font-size="26" style="pointer-events: none;">3</text>
       <text x="100" y="175" text-anchor="middle" font-family="Verdana" font-size="26">6</text>
       <text x="30" y="110" text-anchor="middle" font-family="Verdana" font-size="26">9</text>
