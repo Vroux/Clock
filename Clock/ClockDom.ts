@@ -39,9 +39,9 @@ export class ClockDom {
         <circle r="96" cx="100" cy="100" stroke="black"  stroke-width="4" fill="beige" />
         ${this.defineBackGround()}
         <path id="next_hand" d="M 100 100 l 0 -60" stroke="transparent" stroke-width="6" transform="rotate(0, 100, 100)" />
-        <path id="seconde_hand" data-selectable="yes" d="M 100 100 l 0 -90" stroke="black" stroke-width="2" transform="rotate(0, 100, 100)" />
-        <path id="minute_hand" data-selectable="yes" d="M 100 100 l 0 -90" stroke="black" stroke-width="4" transform="rotate(0, 100, 100)" />
-        <path id="hour_hand" data-selectable="yes" d="M 100 100 l 0 -60" stroke="black" stroke-width="6" transform="rotate(0, 100, 100)" />
+        <path id="seconde_hand" data-selectable="yes" d="M 100 100 l 0 -70" stroke="black" stroke-width="2" transform="rotate(0, 100, 100)" />
+        <path id="minute_hand" data-selectable="yes" d="M 100 100 l 0 -70" stroke="black" stroke-width="4" transform="rotate(0, 100, 100)" />
+        <path id="hour_hand" data-selectable="yes" d="M 100 100 l 0 -40" stroke="black" stroke-width="6" transform="rotate(0, 100, 100)" />
         <circle r="4" cx="100" cy="100" stroke="black"  stroke-width="4" fill="beige" />
       </svg>
     `;
